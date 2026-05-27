@@ -3,8 +3,8 @@ name: Awards Agent
 
 on:
   schedule:
-    - cron: '0 9 * * 1'   # Every Monday 9am
-  workflow_dispatch:      # Allows manual run
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
 
 jobs:
   run:
@@ -27,3 +27,5 @@ jobs:
         env:
           OPENAI_KEY: ${{ secrets.OPENAI_KEY }}
           TAVILY_KEY: ${{ secrets.TAVILY_KEY }}
+``
+
