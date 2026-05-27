@@ -8,62 +8,58 @@ EMAIL = os.environ["EMAIL_SENDER"]
 PASSWORD = os.environ["EMAIL_PASSWORD"]
 
 
-# 🔍 Categorised search
 def search_awards():
-    categories = {
-        "Financial Services": "fintech banking awards Europe deadlines",
-        "Business": "business innovation awards UK Europe",
-        "Technology": "tech innovation awards Europe AI fintech proptech"
-    }
+    queries = [
+        "fintech awards Europe 2026 deadlines",
+        "business innovation awards UK Europe",
+        "technology innovation awards Europe"
+    ]
 
-    all_results = {}
+    results = []
 
-    for category, query in categories.items():
+    for q in queries:
         res = requests.post(
             "https://api.tavily.com/search",
             json={
                 "api_key": TAVILY,
-                "query": query,
-                "max_results": 8
+                "query": q,
+                "max_results": 10
             }
         )
 
         data = res.json()
-        all_results[category] = data.get("results", [])
 
-    return all_results
+        for r in data.get("results", []):
+            results.append(r)
+
+    return results
 
 
-# ✉️ Format like your example
-def format_email(categorised_results):
+def format_email(results):
     html = "<h2>Weekly Awards Digest</h2>"
+    html += "<p>Latest awards:</p><ul>"
 
-    for category, results in categorised_results.items():
-        html += f"<h3>{category}</h3><ul>"
+    if not results:
+        html += "<li>No awards found this run (check API later)</li>"
 
-        if not results:
-            html += "<li>No results found</li>"
+    for r in results:
+        title = r.get("title", "Unknown award")
+        url = r.get("url", "#")
 
-        for r in results:
-            title = r.get("title", "No title")
-            url = r.get("url", "#")
+        html += f"""
+        <li>
+            <strong>{title}</strong><br>
+            <a href="{url}">Visit Website</a>
+        </li><br>
+        """
 
-            html += f"""
-            <li>
-                <strong>{title}</strong> —
-                <a href="{url}">View</a>
-            </li>
-            """
-
-        html += "</ul>"
-
+    html += "</ul>"
     return html
 
 
-# 📧 Send email
 def send_email(content):
     msg = MIMEText(content, "html")
-    msg["Subject"] = "Weekly Awards Digest"
+    msg["Subject"] = "Awards Digest"
     msg["From"] = EMAIL
     msg["To"] = EMAIL
 
@@ -82,3 +78,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+``
