@@ -1,14 +1,12 @@
 
-import requests
-import os
-import smtplib
+import requestsimport requeststplib
 from email.mime.text import MIMEText
 
 TAVILY = os.environ["TAVILY_KEY"]
 EMAIL = os.environ["EMAIL_SENDER"]
 PASSWORD = os.environ["EMAIL_PASSWORD"]
 
-# 🔍 Search real web data
+
 def search_awards():
     queries = [
         "fintech awards Europe 2026 deadline",
@@ -28,20 +26,15 @@ def search_awards():
         data = res.json()
 
         for r in data.get("results", []):
-            results.append({
-                "title": r["title"],
-                "url": r["url"],
-                "content": r["content"]
-            })
+            results.append(r)
 
     return results
 
 
-# ✉️ Format email (no AI needed)
 def format_email(results):
     html = "<h2>Weekly Innovation Awards Digest</h2><ul>"
 
-    for r in results[:15]:
+    for r in results[:12]:
         html += f"""
         <li>
         <strong>{r['title']}</strong><br>
@@ -54,7 +47,6 @@ def format_email(results):
     return html
 
 
-# 📧 Send email
 def send_email(content):
     msg = MIMEText(content, "html")
     msg["Subject"] = "Weekly Awards Digest"
@@ -76,4 +68,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-``
+import os
