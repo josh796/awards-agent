@@ -1,24 +1,19 @@
 
 import requests
-from openai import OpenAI
 import os
 import smtplib
 from email.mime.text import MIMEText
 
-# 🔐 Load secrets from GitHub
-OPENAI = os.environ["OPENAI_KEY"]
 TAVILY = os.environ["TAVILY_KEY"]
 EMAIL = os.environ["EMAIL_SENDER"]
 PASSWORD = os.environ["EMAIL_PASSWORD"]
 
-client = OpenAI(api_key=OPENAI)
-
-# 🔍 Step 1: REAL web search
+# 🔍 Search real web data
 def search_awards():
     queries = [
-        "fintech innovation awards Europe 2026 deadline",
-        "proptech awards UK Europe 2026 application deadline",
-        "lawtech innovation awards Europe 2026"
+        "fintech awards Europe 2026 deadline",
+        "proptech awards UK innovation 2026",
+        "lawtech awards Europe 2026"
     ]
 
     results = []
@@ -33,55 +28,35 @@ def search_awards():
         data = res.json()
 
         for r in data.get("results", []):
-            results.append(r["content"])
+            results.append({
+                "title": r["title"],
+                "url": r["url"],
+                "content": r["content"]
+            })
 
     return results
 
 
-# 🤖 Step 2: Extract structured awards
-def extract(data):
-    text = " ".join(data)
+# ✉️ Format email (no AI needed)
+def format_email(results):
+    html = "<h2>Weekly Innovation Awards Digest</h2><ul>"
 
-    prompt = f"""
-    Extract REAL fintech, proptech, and lawtech innovation awards.
+    for r in results[:15]:
+        html += f"""
+        <li>
+        <strong>{r['title']}</strong><br>
+        <a href="{r['url']}">Visit Website</a><br>
+        <small>{r['content'][:150]}...</small>
+        </li><br>
+        """
 
-    RULES:
-    - Only FUTURE awards (next 12 months)
-    - Minimum 10 awards
-    - Include title, location, date, and link
-    - Do NOT make up fake events
-
-    Return CLEAN HTML:
-    <ul>
-      <li>
-        <strong>Title:</strong> ...<br>
-        <strong>Location:</strong> ...<br>
-        <strong>Date:</strong> ...<br>
-        <strong>Link:</strong> URL
-      </li>
-    </ul>
-
-    TEXT:
-    {text}
-    """
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    return response.choices[0].message.content
+    html += "</ul>"
+    return html
 
 
-# 📧 Step 3: Send email
+# 📧 Send email
 def send_email(content):
-
-    msg = MIMEText(f"""
-    <h2>Weekly Innovation Awards Digest</h2>
-    <p>Automatically generated list of upcoming awards:</p>
-    {content}
-    """, "html")
-
+    msg = MIMEText(content, "html")
     msg["Subject"] = "Weekly Awards Digest"
     msg["From"] = EMAIL
     msg["To"] = EMAIL
@@ -93,13 +68,12 @@ def send_email(content):
     server.quit()
 
 
-# 🚀 Step 4: Main pipeline
 def main():
-    data = search_awards()
-    result = extract(data)
-    send_email(result)
+    results = search_awards()
+    email_content = format_email(results)
+    send_email(email_content)
 
 
-# ▶️ Run automatically
 if __name__ == "__main__":
     main()
+``
