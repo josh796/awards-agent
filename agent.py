@@ -9,49 +9,32 @@ PASSWORD = os.environ["EMAIL_PASSWORD"]
 
 
 def search_awards():
-    queries = [
-        "fintech awards Europe 2026 deadlines",
-        "business innovation awards UK Europe",
-        "technology innovation awards Europe"
-    ]
+    query = "fintech awards Europe business innovation awards deadlines"
 
-    results = []
+    res = requests.post(
+        "https://api.tavily.com/search",
+        json={
+            "api_key": TAVILY,
+            "query": query,
+            "max_results": 10
+        }
+    )
 
-    for q in queries:
-        res = requests.post(
-            "https://api.tavily.com/search",
-            json={
-                "api_key": TAVILY,
-                "query": q,
-                "max_results": 10
-            }
-        )
+    data = res.json()
 
-        data = res.json()
-
-        for r in data.get("results", []):
-            results.append(r)
-
-    return results
+    # ✅ DEBUG: return raw results
+    return data.get("results", [])
 
 
 def format_email(results):
     html = "<h2>Weekly Awards Digest</h2>"
-    html += "<p>Latest awards:</p><ul>"
+    html += "<p>Debug view of results:</p><ul>"
 
     if not results:
-        html += "<li>No awards found this run (check API later)</li>"
+        html += "<li>❌ No data returned from Tavily</li>"
 
     for r in results:
-        title = r.get("title", "Unknown award")
-        url = r.get("url", "#")
-
-        html += f"""
-        <li>
-            <strong>{title}</strong><br>
-            <a href="{url}">Visit Website</a>
-        </li><br>
-        """
+        html += f"<li>{str(r)}</li><br>"
 
     html += "</ul>"
     return html
@@ -72,10 +55,8 @@ def send_email(content):
 
 def main():
     results = search_awards()
-    email_content = format_email(results)
-    send_email(email_content)
+    send_email(format_email(results))
 
 
 if __name__ == "__main__":
     main()
-``
