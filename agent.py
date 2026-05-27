@@ -3,67 +3,67 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 
-# ✅ Load secrets
 TAVILY = os.environ["TAVILY_KEY"]
 EMAIL = os.environ["EMAIL_SENDER"]
 PASSWORD = os.environ["EMAIL_PASSWORD"]
 
 
-# 🔍 Search awards using Tavily
+# 🔍 Categorised search
 def search_awards():
-    queries = [
-        "fintech awards Europe 2026",
-        "proptech awards UK 2026",
-        "lawtech awards Europe 2026"
-    ]
+    categories = {
+        "Financial Services": "fintech banking awards Europe deadlines",
+        "Business": "business innovation awards UK Europe",
+        "Technology": "tech innovation awards Europe AI fintech proptech"
+    }
 
-    results = []
+    all_results = {}
 
-    for q in queries:
+    for category, query in categories.items():
         res = requests.post(
             "https://api.tavily.com/search",
             json={
                 "api_key": TAVILY,
-                "query": q,
-                "max_results": 5
+                "query": query,
+                "max_results": 8
             }
         )
 
         data = res.json()
+        all_results[category] = data.get("results", [])
 
-        for r in data.get("results", []):
-            results.append(r)
-
-    return results
+    return all_results
 
 
-# ✉️ Clean HTML email formatting (FIXED)
-def format_email(results):
+# ✉️ Format like your example
+def format_email(categorised_results):
     html = "<h2>Weekly Awards Digest</h2>"
-    html += "<p>Latest fintech, proptech and lawtech awards:</p>"
-    html += "<ul>"
 
-    for r in results[:10]:
-        title = r.get('title', 'No title')
-        url = r.get('url', '#')
-        content = r.get('content', '')[:120]
+    for category, results in categorised_results.items():
+        html += f"<h3>{category}</h3><ul>"
 
-        html += f"""
-        <li>
-            <strong>{title}</strong><br>
-            <a href="{url}">Visit Website</a><br>
-            <small>{content}...</small>
-        </li><br>
-        """
+        if not results:
+            html += "<li>No results found</li>"
 
-    html += "</ul>"
+        for r in results:
+            title = r.get("title", "No title")
+            url = r.get("url", "#")
+
+            html += f"""
+            <li>
+                <strong>{title}</strong> —
+                <a href="{url}">View</a>
+            </li>
+            """
+
+        html += "</ul>"
+
     return html
 
 
 # 📧 Send email
 def send_email(content):
     msg = MIMEText(content, "html")
-    msg["Subject"] = "Awards Digest"
+    msg["Subject"] = "Weekly Awards Digest"
     msg["From"] = EMAIL
     msg["To"] = EMAIL
 
@@ -74,7 +74,6 @@ def send_email(content):
     server.quit()
 
 
-# 🚀 Main function
 def main():
     results = search_awards()
     email_content = format_email(results)
