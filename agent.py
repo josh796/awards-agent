@@ -43,8 +43,7 @@ html += "<h3>Financial Services & Innovation Awards</h3><ul>"
     if not awards:
         html += "<li>No relevant future awards found this week</li>"
 
-  
-for a in awards:
+  for a in awards:
 html += f"<li>{a['title']} - {a['url']}</li>"
 
    
