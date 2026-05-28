@@ -1,32 +1,66 @@
 import os
 import smtplib
+import requests
 from email.mime.text import MIMEText
+from datetime import datetime
 
-# ✅ Load email credentials
 EMAIL = os.environ["EMAIL_SENDER"]
 PASSWORD = os.environ["EMAIL_PASSWORD"]
 
-def send_email():
-    print("✅ RUNNING WORKING VERSION ✅")
+TAVILY_KEY = os.environ.get("TAVILY_KEY")
 
-    html = """
-    <h2>Weekly Awards Digest</h2>
 
-    <h3>Financial Services</h3>
-    <ul>
-        <li>Europe FinTech Awards – 6 Mar – github.com</li>
-        <li>PayTech Awards – 13 Mar – github.com</li>
-    </ul>
+def fetch_awards():
+    query = "innovation awards fintech business technology awards June July 2026 deadlines"
 
-    <h3>Business</h3>
-    <ul>
-        <li>UK Business Awards – 17 Apr – github.com</li>
-        <li>Startup Awards UK – 16 Mar – github.com</li>
-    </ul>
-    """
+    response = requests.post(
+        "https://api.tavily.com/search",
+        json={
+            "api_key": TAVILY_KEY,
+            "query": query,
+            "max_results": 15
+        }
+    )
 
-    msg = MIMEText(html, "html")
-    msg["Subject"] = "Awards Digest"
+    data = response.json()
+    raw_results = data.get("results", [])
+
+    awards = []
+
+    for r in raw_results:
+        title = r.get("title", "")
+        url = r.get("url", "")
+        content = r.get("content", "")
+
+        # ✅ very simple future filter (June onwards keywords)
+      if content and any(month in content.lower() for month in ["june", "july", "aug", "2026", "deadline"]):
+            awards.append({
+                "title": title,
+                "url": url
+            })
+
+    return awards[:15]  # limit to 15
+
+
+
+def format_email(awards):
+    html = "<h2>Weekly Awards Digest</h2>"
+    html += "<h3>Financial Services & Innovation Awards</h3><ul>"
+
+    if not awards:
+        html += "<li>No relevant future awards found this week</li>"
+
+    for a in awards:
+  
+html += f"<li>{a['title']} – {a['url']}</li>"
+``
+   
+
+    html += "</ul>"
+    return html
+def send_email(content):
+    msg = MIMEText(content, "html")
+    msg["Subject"] = "Weekly Awards Digest"
     msg["From"] = EMAIL
     msg["To"] = EMAIL
 
@@ -35,8 +69,18 @@ def send_email():
     server.login(EMAIL, PASSWORD)
     server.send_message(msg)
     server.quit()
-    
+
+
+def main():
+    print("✅ RUNNING LIVE AWARDS FETCH ✅")
+
+    awards = fetch_awards()
+    email_content = format_email(awards)
+    send_email(email_content)
+
+
 if __name__ == "__main__":
-    send_email()
+    main()
+
 
 
