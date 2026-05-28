@@ -39,12 +39,19 @@ def fetch_awards():
     return awards[:15]
 
 
-    def format_email(awards):
+def format_email(awards):
     html = "<h2>Weekly Awards Digest</h2>"
     html += "<h3>Financial Services & Innovation Awards</h3><ul>"
 
-     if not awards:
-     html += "<li>No relevant future awards found this week</li>"
+    if not awards:
+        html += "<li>No relevant future awards found this week</li>"
+
+    for a in awards:
+        html += f"<li>{a['title']} - {a['url']}</li>"
+
+    html += "</ul>"
+    return html
+
 
     for a in awards:
     html += f"<li>{a['title']} - {a['url']}</li>"
