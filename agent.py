@@ -2,6 +2,9 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 
+import smtplib
+from email.mime.text import MIMEText
+
 # ✅ Load email credentials
 EMAIL = os.environ["EMAIL_SENDER"]
 PASSWORD = os.environ["EMAIL_PASSWORD"]
