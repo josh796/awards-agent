@@ -1,9 +1,15 @@
-import osimport osText
+import os
+import smtplib
+from email.mime.text import MIMEText
 
+# ✅ Load email credentials
 EMAIL = os.environ["EMAIL_SENDER"]
 PASSWORD = os.environ["EMAIL_PASSWORD"]
 
 def send_email():
+    print("✅ THIS IS THE FILE BEING EXECUTED ✅")
+
+    # ✅ Proper HTML (NOT escaped)
     html = """
     <h2>Weekly Awards Digest</h2>
 
@@ -25,6 +31,7 @@ def send_email():
     msg["From"] = EMAIL
     msg["To"] = EMAIL
 
+    # ✅ Gmail SMTP
     server = smtplib.SMTP("smtp.gmail.com", 587)
     server.starttls()
     server.login(EMAIL, PASSWORD)
@@ -33,5 +40,3 @@ def send_email():
 
 if __name__ == "__main__":
     send_email()
-
-import smtplib
