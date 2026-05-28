@@ -27,7 +27,7 @@ def fetch_awards():
 
     awards = []
 
-  for r in raw_results:
+for r in raw_results:
     title = r.get("title", "")
     url = r.get("url", "")
     content = r.get("content", "")
