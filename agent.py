@@ -19,27 +19,28 @@ def fetch_awards():
             "api_key": TAVILY_KEY,
             "query": query,
             "max_results": 15
-        }
-    )
+    
+def fetch_awards():
+    query = "..."
 
+    response = requests.post(...)
     data = response.json()
     raw_results = data.get("results", [])
 
     awards = []
 
-for r in raw_results:
-    title = r.get("title", "")
-    url = r.get("url", "")
-    content = r.get("content", "")
+    for r in raw_results:
+        title = r.get("title", "")
+        url = r.get("url", "")
+        content = r.get("content", "")
 
-    # ✅ very simple future filter
-    if content and any(month in content.lower() for month in ["june", "july", "aug", "2026", "deadline"]):
-        awards.append({
-            "title": title,
-            "url": url
-        })
+        if content and any(month in content.lower() for month in ["june", "july", "aug", "2026", "deadline"]):
+            awards.append({
+                "title": title,
+                "url": url
+            })
 
-    return awards[:15]  # limit to 15
+    return awards[:15]   ✅ ← IMPORTANT: inside function
 
 
 
