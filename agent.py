@@ -27,17 +27,17 @@ def fetch_awards():
 
     awards = []
 
-    for r in raw_results:
-        title = r.get("title", "")
-        url = r.get("url", "")
-        content = r.get("content", "")
+  for r in raw_results:
+    title = r.get("title", "")
+    url = r.get("url", "")
+    content = r.get("content", "")
 
-        # ✅ very simple future filter (June onwards keywords)
-      if content and any(month in content.lower() for month in ["june", "july", "aug", "2026", "deadline"]):
-            awards.append({
-                "title": title,
-                "url": url
-            })
+    # ✅ very simple future filter
+    if content and any(month in content.lower() for month in ["june", "july", "aug", "2026", "deadline"]):
+        awards.append({
+            "title": title,
+            "url": url
+        })
 
     return awards[:15]  # limit to 15
 
@@ -53,7 +53,7 @@ def format_email(awards):
     for a in awards:
   
 html += f"<li>{a['title']} – {a['url']}</li>"
-``
+
    
 
     html += "</ul>"
