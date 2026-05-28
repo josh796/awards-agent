@@ -50,9 +50,9 @@ def format_email(awards):
     if not awards:
         html += "<li>No relevant future awards found this week</li>"
 
-    for a in awards:
   
-html += f"<li>{a['title']} – {a['url']}</li>"
+for a in awards:
+    html += f"<li>{a['title']} - {a['url']}</li>"
 
    
 
